@@ -11,6 +11,8 @@ public class CameraFollow : MonoBehaviour
     public float yAngle = 30;
     public float zAngle = 0;
 
+    public float cameraMoveSpeed = 10;
+
     private void Start()
     {
         transform.SetPositionAndRotation(new Vector3(
@@ -20,12 +22,15 @@ public class CameraFollow : MonoBehaviour
             ), Quaternion.Euler(xAngle, yAngle, zAngle));
     }
 
-    private void LateUpdate()
+    private void Update()
     {
-        transform.position = new Vector3(
+        Vector3 offsetTargetPos = new(
         target.transform.position.x + xOffset,
         target.transform.position.y + yOffset,
         target.transform.position.z + zOffset
         );
+
+        transform.position = Vector3.Lerp(transform.position, offsetTargetPos, cameraMoveSpeed * Time.deltaTime);
+
     }
 }

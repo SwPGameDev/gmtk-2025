@@ -3,34 +3,24 @@ using UnityEngine;
 public class CameraFollow : MonoBehaviour
 {
     public GameObject target;
-    public float xOffset = 0;
-    public float yOffset = 0;
-    public float zOffset = 0;
+    public Vector3 offsetVector;
 
-    public float xAngle = -45;
-    public float yAngle = 30;
-    public float zAngle = 0;
+    public Vector3 angleOffset;
 
     public float cameraMoveSpeed = 10;
 
     private void Start()
     {
-        transform.SetPositionAndRotation(new Vector3(
-            target.transform.position.x + xOffset,
-            target.transform.position.y + yOffset,
-            target.transform.position.z + zOffset
-            ), Quaternion.Euler(xAngle, yAngle, zAngle));
+        transform.SetPositionAndRotation((target.transform.position + offsetVector), Quaternion.Euler(angleOffset));
     }
 
-    private void Update()
+    private void LateUpdate()
     {
-        Vector3 offsetTargetPos = new(
-        target.transform.position.x + xOffset,
-        target.transform.position.y + yOffset,
-        target.transform.position.z + zOffset
-        );
+        Vector3 offsetTargetPos = target.transform.position + offsetVector;
 
         transform.position = Vector3.Lerp(transform.position, offsetTargetPos, cameraMoveSpeed * Time.deltaTime);
 
+
+        //transform.position = offsetTargetPos;
     }
 }

@@ -12,9 +12,6 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField] private float lookRotationSpeed;
 
-    // MOVEMENT
-    [SerializeField] private float playerHeight = 2;
-
     public bool isDashPressed = false;
     public InputAction movementAction;
     public Vector2 movementVector;
@@ -57,13 +54,12 @@ public class PlayerMovement : MonoBehaviour
     {
         movementVector = movementAction.ReadValue<Vector2>();
 
-        if (movementAction != null && relativeMovementVector != Vector3.zero)
-        {
-            //Quaternion rotationTarget = Quaternion.LookRotation(rb.linearVelocity, transform.up);
-            Quaternion rotationTarget = Quaternion.LookRotation(relativeMovementVector, transform.up);
-            Quaternion rotationYOnly = Quaternion.Euler(transform.rotation.eulerAngles.x, rotationTarget.eulerAngles.y, transform.rotation.eulerAngles.z);
-            mesh.transform.rotation = Quaternion.Slerp(mesh.transform.rotation, rotationYOnly, Time.deltaTime * lookRotationSpeed);
-        }
+        //if (movementAction != null && relativeMovementVector != Vector3.zero)
+        //{
+        //    Quaternion rotationTarget = Quaternion.LookRotation(relativeMovementVector, transform.up);
+        //    Quaternion rotationYOnly = Quaternion.Euler(transform.rotation.eulerAngles.x, rotationTarget.eulerAngles.y, transform.rotation.eulerAngles.z);
+        //    mesh.transform.rotation = Quaternion.Slerp(mesh.transform.rotation, rotationYOnly, Time.deltaTime * lookRotationSpeed);
+        //}
 
         if (!canDash)
         {
@@ -75,6 +71,18 @@ public class PlayerMovement : MonoBehaviour
                 canDash = true;
             }
         }
+    }
+
+    private void LateUpdate()
+    {
+        mesh.transform.position = transform.position;
+        if (relativeMovementVector != Vector3.zero)
+        {
+            Quaternion rotationTarget = Quaternion.LookRotation(relativeMovementVector, transform.up);
+            Quaternion rotationYOnly = Quaternion.Euler(transform.rotation.eulerAngles.x, rotationTarget.eulerAngles.y, transform.rotation.eulerAngles.z);
+            mesh.transform.rotation = Quaternion.Slerp(mesh.transform.rotation, rotationYOnly, Time.deltaTime * lookRotationSpeed);
+        }
+
     }
 
     private void FixedUpdate()

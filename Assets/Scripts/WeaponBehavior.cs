@@ -7,9 +7,12 @@ public class WeaponBehavior : MonoBehaviour
     public Rigidbody rb;
     public PlayerBehavior playerBehavior;
 
-    float damage;
+    float baseDamage = 1;
 
     public float slowDownOnHitMod;
+    public float enemyMass = 1;
+
+    public float minimumSpinVelocity = 1;
 
     // Audio
     public AudioSource impactSound;
@@ -17,7 +20,7 @@ public class WeaponBehavior : MonoBehaviour
 
     private void Start()
     {
-        damage = playerBehavior.weaponDamage;
+        baseDamage = playerBehavior.weaponDamage;
     }
 
     private void FixedUpdate()
@@ -28,19 +31,19 @@ public class WeaponBehavior : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if ((enemyLayerMask.value & (1 << other.transform.gameObject.layer)) > 0)
+        if (Mathf.Abs(rb.angularVelocity.y) > minimumSpinVelocity && (enemyLayerMask.value & (1 << other.transform.gameObject.layer)) > 0)
         {
             Debug.Log(other.name);
-            Debug.Log(rb.angularVelocity);
-            other.GetComponent<EnemyBehavior>().TakeHit(damage);
+            other.GetComponent<EnemyBehavior>().TakeHit(baseDamage + Mathf.Clamp(Mathf.Abs(rb.angularVelocity.y) - 5, 0, 20));
+            Debug.Log("Combined Damage: " + (baseDamage + Mathf.Clamp(Mathf.Abs(rb.angularVelocity.y) - 5, 0, 20)));
 
             if (rb.angularVelocity.y > 0 )
             {
-                rb.angularVelocity = new(0, rb.angularVelocity.y - (other.attachedRigidbody.mass * slowDownOnHitMod), 0);
+                rb.angularVelocity = new(0, rb.angularVelocity.y - (enemyMass * slowDownOnHitMod), 0);
             }
             else
             {
-                rb.angularVelocity = new(0, rb.angularVelocity.y + (other.attachedRigidbody.mass * slowDownOnHitMod), 0);
+                rb.angularVelocity = new(0, rb.angularVelocity.y + (enemyMass * slowDownOnHitMod), 0);
             }
 
             //rb.angularVelocity = new(rb.angularVelocity.x, rb.angularVelocity.y / slowDownOnHitMod, rb.angularVelocity.z);

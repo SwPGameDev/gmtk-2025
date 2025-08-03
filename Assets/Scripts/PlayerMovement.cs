@@ -7,7 +7,6 @@ public class PlayerMovement : MonoBehaviour
     private Camera cam;
 
     private Rigidbody rb;
-    public Animator anim;
     [SerializeField] private GameObject mesh;
 
     [SerializeField] private float lookRotationSpeed;

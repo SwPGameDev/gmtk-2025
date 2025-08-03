@@ -9,28 +9,45 @@ public class EnemyBehavior : MonoBehaviour
     public bool dead = false;
 
     public GameObject target;
-    NavMeshAgent agent;
-    Rigidbody rb;
+    private NavMeshAgent agent;
 
     public LayerMask playerLayerMask;
-    float distanceToTarget;
-    public float range = 5;
     public float damage = 5;
 
-    bool canAttack = true;
-    public float attackCooldown = 1;
-    float attackTimer = 0;
+    private bool canAttack = true;
+    public float attackCooldown = 2;
+    private float attackTimer = 0;
+
+    public AudioSource hurtSounds;
+    public AudioSource attackSounds;
+    public AudioSource deathSounds;
+
+    Collider col;
+
+    public Animator anim;
+    public float moveDelay = 2;
+    float delayTimer = 0;
+    bool startMoving = false;
 
     private void Start()
     {
         currentHealth = maxHealth;
         agent = GetComponent<NavMeshAgent>();
-        rb = GetComponent<Rigidbody>();
+        col = GetComponent<Collider>();
     }
 
-    void Update()
+    private void Update()
     {
-        if (!dead)
+        if (delayTimer < moveDelay)
+        {
+            delayTimer += Time.deltaTime;
+        }
+        else
+        {
+            startMoving = true;
+        }
+
+        if (!dead && startMoving)
         {
             if (target != null)
             {
@@ -45,21 +62,21 @@ public class EnemyBehavior : MonoBehaviour
                     canAttack = true;
                 }
             }
-
         }
-
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnCollisionStay(Collision collision)
     {
-        if ((playerLayerMask.value & (1 << collision.transform.gameObject.layer)) > 0)
+        if (canAttack)
         {
-            if (canAttack)
+            if ((playerLayerMask.value & (1 << collision.transform.gameObject.layer)) > 0)
             {
+                anim.SetTrigger("attack");
+
                 canAttack = false;
                 collision.gameObject.GetComponent<PlayerBehavior>().TakeHit(damage);
 
-                //audioSource.Play();
+                //attackSounds.Play();
             }
         }
     }
@@ -67,18 +84,26 @@ public class EnemyBehavior : MonoBehaviour
     public void TakeHit(float damageParam)
     {
         currentHealth -= damageParam;
+        //hurtSounds.Play();
+
         if (currentHealth <= 0)
         {
             Die();
         }
+        else
+        {
+            anim.SetTrigger("hitReaction");
+        }
     }
-
 
     public void Die()
     {
+        anim.SetTrigger("death");
+        col.enabled = false;
+        //deathSounds.Play();
         dead = true;
         agent.enabled = false;
-        rb.isKinematic = false;
-        rb.AddForce(500 * Vector3.up);
+
+        Destroy(gameObject, 5);
     }
 }

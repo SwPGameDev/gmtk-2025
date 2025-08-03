@@ -7,7 +7,7 @@ public class PlayerMovement : MonoBehaviour
     private Camera cam;
 
     private Rigidbody rb;
-    private Animator anim;
+    public Animator anim;
     [SerializeField] private GameObject mesh;
 
     [SerializeField] private float lookRotationSpeed;
@@ -34,6 +34,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float velocitySlerp = 5;
 
     // ANIMATION
+    public float bounceSpeed = 5;
+    public float bounceAmplitude = 15;
+
     public Vector3 LookPoint;
 
     private Vector3 camForward;
@@ -45,7 +48,6 @@ public class PlayerMovement : MonoBehaviour
         gravity = Physics.gravity;
         cam = Camera.main;
         rb = GetComponent<Rigidbody>();
-        anim = mesh.GetComponent<Animator>();
 
         movementAction = InputSystem.actions.FindAction("Move");
     }
@@ -53,13 +55,6 @@ public class PlayerMovement : MonoBehaviour
     private void Update()
     {
         movementVector = movementAction.ReadValue<Vector2>();
-
-        //if (movementAction != null && relativeMovementVector != Vector3.zero)
-        //{
-        //    Quaternion rotationTarget = Quaternion.LookRotation(relativeMovementVector, transform.up);
-        //    Quaternion rotationYOnly = Quaternion.Euler(transform.rotation.eulerAngles.x, rotationTarget.eulerAngles.y, transform.rotation.eulerAngles.z);
-        //    mesh.transform.rotation = Quaternion.Slerp(mesh.transform.rotation, rotationYOnly, Time.deltaTime * lookRotationSpeed);
-        //}
 
         if (!canDash)
         {
@@ -81,6 +76,8 @@ public class PlayerMovement : MonoBehaviour
             Quaternion rotationTarget = Quaternion.LookRotation(relativeMovementVector, transform.up);
             Quaternion rotationYOnly = Quaternion.Euler(transform.rotation.eulerAngles.x, rotationTarget.eulerAngles.y, transform.rotation.eulerAngles.z);
             mesh.transform.rotation = Quaternion.Slerp(mesh.transform.rotation, rotationYOnly, Time.deltaTime * lookRotationSpeed);
+
+            mesh.transform.rotation = Quaternion.Euler(Mathf.Sin(Time.time * bounceSpeed) * bounceAmplitude, mesh.transform.rotation.eulerAngles.y, mesh.transform.rotation.eulerAngles.z);
         }
 
     }

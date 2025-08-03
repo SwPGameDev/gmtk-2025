@@ -3,17 +3,27 @@ using UnityEngine;
 public class WeaponBehavior : MonoBehaviour
 {
     public LayerMask enemyLayerMask;
-    public AudioSource audioSource;
+
     public Rigidbody rb;
     public PlayerBehavior playerBehavior;
 
     float damage;
 
-    public float slowDownOnHit;
+    public float slowDownOnHitMod;
+
+    // Audio
+    public AudioSource impactSound;
+    public AudioSource whistleSound;
 
     private void Start()
     {
         damage = playerBehavior.weaponDamage;
+    }
+
+    private void FixedUpdate()
+    {
+        whistleSound.pitch = Mathf.Clamp(Mathf.Abs(rb.angularVelocity.y), 0, 5);
+        whistleSound.volume = Mathf.Clamp(Mathf.Abs(rb.angularVelocity.y), 0, 1);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -24,8 +34,18 @@ public class WeaponBehavior : MonoBehaviour
             Debug.Log(rb.angularVelocity);
             other.GetComponent<EnemyBehavior>().TakeHit(damage);
 
-            rb.angularVelocity = new(rb.angularVelocity.x, rb.angularVelocity.y / slowDownOnHit, rb.angularVelocity.z);
-            audioSource.Play();
+            if (rb.angularVelocity.y > 0 )
+            {
+                rb.angularVelocity = new(0, rb.angularVelocity.y - (other.attachedRigidbody.mass * slowDownOnHitMod), 0);
+            }
+            else
+            {
+                rb.angularVelocity = new(0, rb.angularVelocity.y + (other.attachedRigidbody.mass * slowDownOnHitMod), 0);
+            }
+
+            //rb.angularVelocity = new(rb.angularVelocity.x, rb.angularVelocity.y / slowDownOnHitMod, rb.angularVelocity.z);
+
+            impactSound.Play();
         }
     }
 }
